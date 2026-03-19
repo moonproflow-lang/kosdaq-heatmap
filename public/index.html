@@ -46,7 +46,7 @@ select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px
 #errbox{background:#fff8e1;border:1px solid #ffe082;border-radius:5px;padding:6px 10px;font-size:11px;color:#e65100;margin-bottom:6px;display:none}
 
 /* 히트맵 */
-#map-wrap{width:100%;position:relative;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+#map-wrap{width:100%;position:relative;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05);aspect-ratio:16/9}
 #map-svg{width:100%;display:block}
 .cell-rect{cursor:pointer;transition:opacity .2s}
 
@@ -83,6 +83,10 @@ select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px
   <button class="sj-btn" id="sjBtn" onclick="toggleSJ(this)">
     ★ 서진시스템 <span class="sj-rank" id="sjRank">–위</span>
   </button>
+  <div class="tab-grp" id="sortGrp">
+    <button class="tab on" onclick="setSort('size',this)">규모순</button>
+    <button class="tab" onclick="setSort('sector',this)">업종순</button>
+  </div>
   <select onchange="setSec(this.value)">
     <option value="">전체 업종</option>
     <option value="이차전지">이차전지</option>
@@ -208,7 +212,14 @@ const SJ_IDX = ST.findIndex(s=>s.t==='178320.KQ');
 document.getElementById('sjRank').textContent = (SJ_IDX+1)+'위';
 
 const prices={};
-let limitN=100, secF='', srchQ='', sjMode=false;
+let limitN=100, secF='', srchQ='', sjMode=false, sortMode='size';
+
+function setSort(mode, btn){
+  sortMode=mode;
+  document.querySelectorAll('#sortGrp .tab').forEach(x=>x.classList.remove('on'));
+  btn.classList.add('on');
+  draw();
+}
 
 function toggleDesc(btn){
   const d=document.getElementById('descBody');
@@ -342,37 +353,51 @@ function draw(){
 
   const wrap=document.getElementById('map-wrap');
   const W=wrap.clientWidth||900;
-  const H=Math.max(480,Math.round(W*0.68));
+  const H=Math.round(W*9/16);
 
   const svg=d3.select('#map-svg').attr('viewBox',`0 0 ${W} ${H}`).attr('height',H);
   svg.selectAll('*').remove();
 
   const hasFilter=sjMode||(srchQ.length>0);
 
-  const root=d3.hierarchy({
-    children:Object.entries(
+  let root;
+  if(sortMode==='size'){
+    // 규모순: 섹터 구분 없이 종목 전체를 시총 크기대로 flat 나열
+    root=d3.hierarchy({
+      name:'root',
+      children:list.map(s=>({...s,value:s.w})).sort((a,b)=>b.w-a.w)
+    }).sum(d=>d.value||0);
+  } else {
+    // 업종순: 섹터 이름 가나다순
+    const grouped=Object.entries(
       list.reduce((acc,s)=>{(acc[s.s]=acc[s.s]||[]).push(s);return acc;},{})
-    ).map(([sec,items])=>({name:sec,children:items.map(s=>({...s,value:s.w}))}))
-  }).sum(d=>d.value||0).sort((a,b)=>b.value-a.value);
+    ).map(([sec,items])=>({
+      name:sec,
+      children:items.map(s=>({...s,value:s.w}))
+    })).sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+    root=d3.hierarchy({children:grouped}).sum(d=>d.value||0).sort((a,b)=>b.value-a.value);
+  }
 
   d3.treemap()
     .size([W,H])
-    .paddingOuter(2)
-    .paddingTop(20)
+    .paddingOuter(sortMode==='size'?1:2)
+    .paddingTop(sortMode==='size'?1:20)
     .paddingInner(1)
     .round(true)(root);
 
-  // 섹터 배경
-  const secs=svg.selectAll('g.sec').data(root.children).join('g').attr('class','sec');
-  secs.append('rect')
-    .attr('x',d=>d.x0).attr('y',d=>d.y0)
-    .attr('width',d=>d.x1-d.x0).attr('height',d=>d.y1-d.y0)
-    .attr('fill','#e8ecf4').attr('rx',2);
-  secs.append('text')
-    .attr('x',d=>d.x0+6).attr('y',d=>d.y0+14)
-    .attr('font-size',12).attr('font-weight',700)
-    .attr('fill','rgba(0,0,0,0.65)')
-    .text(d=>d.data.name+' >');
+  // 섹터 배경 — 업종순일 때만 표시
+  if(sortMode==='sector'){
+    const secs=svg.selectAll('g.sec').data(root.children).join('g').attr('class','sec');
+    secs.append('rect')
+      .attr('x',d=>d.x0).attr('y',d=>d.y0)
+      .attr('width',d=>d.x1-d.x0).attr('height',d=>d.y1-d.y0)
+      .attr('fill','#e8ecf4').attr('rx',2);
+    secs.append('text')
+      .attr('x',d=>d.x0+6).attr('y',d=>d.y0+14)
+      .attr('font-size',12).attr('font-weight',700)
+      .attr('fill','rgba(0,0,0,0.65)')
+      .text(d=>d.data.name+' >');
+  }
 
   // 종목 셀
   const leaves=svg.selectAll('g.leaf').data(root.leaves()).join('g').attr('class','leaf');
