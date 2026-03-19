@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8,60 +7,62 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#fff;color:#222;font-size:12px}
-#wrap{padding:14px}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f7f8fa;color:#222;font-size:12px}
+#wrap{padding:14px 16px;max-width:1600px;margin:0 auto}
 h1{font-size:20px;font-weight:700;margin-bottom:2px;color:#111}
-.desc-btn{font-size:11px;color:#666;margin-bottom:10px;cursor:pointer;user-select:none}
-.desc-body{display:none;font-size:11px;color:#555;margin-bottom:10px;line-height:1.7;background:#f9f9f9;padding:8px 12px;border-radius:4px;border:1px solid #e8e8e8}
-.toolbar{display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap}
-.tab-grp{display:flex;border:1px solid #ddd;border-radius:4px;overflow:hidden}
-.tab{padding:5px 14px;background:#fff;font-size:12px;cursor:pointer;color:#555;border:none;border-right:1px solid #ddd}
+.desc-btn{font-size:11px;color:#888;margin-bottom:10px;cursor:pointer;user-select:none}
+.desc-body{display:none;font-size:11px;color:#555;margin-bottom:10px;line-height:1.8;background:#fff;padding:10px 14px;border-radius:6px;border:1px solid #e4e4e4}
+
+/* 툴바 */
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;background:#fff;padding:8px 12px;border-radius:8px;border:1px solid #e8e8e8;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.tab-grp{display:flex;border:1px solid #d0d0d0;border-radius:5px;overflow:hidden}
+.tab{padding:5px 14px;background:#fff;font-size:12px;cursor:pointer;color:#555;border:none;border-right:1px solid #d0d0d0;transition:all .12s}
 .tab:last-child{border-right:none}
-.tab.on{background:#1a3a6b;color:#fff}
-select{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;color:#333}
-.search{padding:4px 10px;border:1px solid #ddd;border-radius:4px;font-size:12px;width:150px;color:#333}
-.rf{padding:5px 12px;border:1px solid #ddd;border-radius:4px;background:#fff;font-size:12px;cursor:pointer;color:#333;margin-left:auto}
-.rf:hover{background:#f5f5f5}
+.tab.on{background:#1a3a6b;color:#fff;font-weight:600}
+.tab:hover:not(.on){background:#f0f4ff}
+
+/* 서진시스템 버튼 */
+.sj-btn{display:flex;align-items:center;gap:5px;padding:5px 13px;border:1.5px solid #c8a000;border-radius:5px;background:#fff;font-size:12px;cursor:pointer;color:#8a6f00;font-weight:700;transition:all .15s;white-space:nowrap}
+.sj-btn .sj-rank{font-size:10px;background:#ffd700;color:#6b4f00;border-radius:3px;padding:1px 5px;font-weight:700}
+.sj-btn.on{background:#ffd700;color:#5a3f00;border-color:#c8a000}
+.sj-btn:hover:not(.on){background:#fffbe6}
+
+select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px;color:#333;background:#fff}
+.search{padding:4px 10px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px;width:150px;color:#333;background:#fff}
+.search:focus{outline:none;border-color:#1a3a6b}
+.rf{padding:5px 12px;border:1px solid #d0d0d0;border-radius:5px;background:#fff;font-size:12px;cursor:pointer;color:#444;margin-left:auto;transition:background .12s}
+.rf:hover{background:#f0f4ff}
 .rf:disabled{opacity:.4;cursor:not-allowed}
-.lgd{display:flex;align-items:center;gap:5px;font-size:11px;color:#666}
-.lgd-bar{width:120px;height:9px;border-radius:2px;background:linear-gradient(to right,#1565c0,#4a90d9,#bdbdbd,#e57373,#b71c1c)}
-.info-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11px;color:#888}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ccc;margin-right:4px;vertical-align:middle}
+.lgd{display:flex;align-items:center;gap:5px;font-size:11px;color:#777}
+.lgd-bar{width:110px;height:8px;border-radius:3px;background:linear-gradient(to right,#1565c0,#42a5f5,#e0e0e0,#ef5350,#b71c1c)}
+
+/* 상태바 */
+.info-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11px;color:#999}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ccc;margin-right:5px;vertical-align:middle}
 .dot.live{background:#43a047;animation:blink 1.8s infinite}
 .dot.err{background:#e53935}
 .dot.ld{background:#fb8c00;animation:blink .7s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
-#errbox{background:#fff8e1;border:1px solid #ffe082;border-radius:4px;padding:6px 10px;font-size:11px;color:#e65100;margin-bottom:6px;display:none}
+#errbox{background:#fff8e1;border:1px solid #ffe082;border-radius:5px;padding:6px 10px;font-size:11px;color:#e65100;margin-bottom:6px;display:none}
 
 /* 히트맵 */
-#map-wrap{width:100%;position:relative;border:1px solid #e0e0e0;border-radius:4px;overflow:hidden;background:#fff}
+#map-wrap{width:100%;position:relative;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 #map-svg{width:100%;display:block}
-.cell-rect{cursor:pointer}
-.cell-rect:hover{filter:brightness(1.13)}
+.cell-rect{cursor:pointer;transition:opacity .2s}
 
-/* 팝업 툴팁 */
-#tooltip{
-  position:fixed;
-  display:none;
-  background:#fff;
-  border:1px solid #ddd;
-  border-radius:6px;
-  padding:12px 16px;
-  box-shadow:0 4px 20px rgba(0,0,0,0.15);
-  z-index:9999;
-  min-width:200px;
-  pointer-events:none;
-}
-#tooltip .tt-name{font-size:15px;font-weight:700;color:#111;margin-bottom:2px}
-#tooltip .tt-code{font-size:11px;color:#888;margin-bottom:8px}
-#tooltip .tt-row{display:flex;justify-content:space-between;font-size:12px;padding:2px 0}
-#tooltip .tt-label{color:#888}
-#tooltip .tt-val{font-weight:500;color:#111}
-#tooltip .tt-chg-pos{font-weight:700;color:#c62828}
-#tooltip .tt-chg-neg{font-weight:700;color:#1565c0}
-#tooltip .tt-chg-zero{font-weight:700;color:#666}
+/* 툴팁 */
+#tooltip{position:fixed;display:none;background:#fff;border:1px solid #e0e0e0;border-radius:8px;padding:13px 16px;box-shadow:0 6px 24px rgba(0,0,0,.13);z-index:9999;min-width:200px;pointer-events:none}
+.tt-name{font-size:15px;font-weight:700;color:#111;margin-bottom:1px}
+.tt-meta{font-size:11px;color:#999;margin-bottom:10px}
+.tt-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0;border-bottom:1px solid #f5f5f5}
+.tt-row:last-child{border-bottom:none}
+.tt-label{color:#aaa}
+.tt-val{font-weight:600;color:#222}
+.tt-up{font-weight:700;color:#c62828}
+.tt-dn{font-weight:700;color:#1565c0}
+.tt-zero{font-weight:700;color:#666}
 
-#footer{margin-top:8px;font-size:11px;color:#999;display:flex;align-items:center;gap:16px}
+#footer{margin-top:8px;font-size:11px;color:#bbb;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -79,6 +80,9 @@ select{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;co
     <button class="tab" onclick="setN(50,this)">상위 50</button>
     <button class="tab on" onclick="setN(100,this)">상위 100</button>
   </div>
+  <button class="sj-btn" id="sjBtn" onclick="toggleSJ(this)">
+    ★ 서진시스템 <span class="sj-rank" id="sjRank">–위</span>
+  </button>
   <select onchange="setSec(this.value)">
     <option value="">전체 업종</option>
     <option value="이차전지">이차전지</option>
@@ -90,7 +94,7 @@ select{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;co
     <option value="미디어">미디어</option>
     <option value="통신장비">통신장비</option>
   </select>
-  <input class="search" type="text" placeholder="🔍 종목 검색..." oninput="doSearch(this.value)">
+  <input class="search" id="searchInput" type="text" placeholder="🔍 종목 검색..." oninput="doSearch(this.value)">
   <button class="rf" id="rfBtn" onclick="loadAll()">↻ 새로고침</button>
   <div class="lgd"><span>-5%</span><div class="lgd-bar"></div><span>+5%</span></div>
 </div>
@@ -108,10 +112,9 @@ select{padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px;co
 </div>
 </div>
 
-<!-- 툴팁 팝업 -->
 <div id="tooltip">
   <div class="tt-name" id="tt-name"></div>
-  <div class="tt-code" id="tt-code"></div>
+  <div class="tt-meta" id="tt-meta"></div>
   <div class="tt-row"><span class="tt-label">현재가</span><span class="tt-val" id="tt-price"></span></div>
   <div class="tt-row"><span class="tt-label">등락률</span><span id="tt-chg"></span></div>
   <div class="tt-row"><span class="tt-label">시가총액</span><span class="tt-val" id="tt-cap"></span></div>
@@ -200,8 +203,12 @@ const ST=[
   {n:"엠플러스",t:"259630.KQ",s:"이차전지",w:6,code:"259630",cap:"0.1조"},
 ];
 
+// 서진시스템 순위 계산
+const SJ_IDX = ST.findIndex(s=>s.t==='178320.KQ');
+document.getElementById('sjRank').textContent = (SJ_IDX+1)+'위';
+
 const prices={};
-let limitN=100,secF='',srchQ='';
+let limitN=100, secF='', srchQ='', sjMode=false;
 
 function toggleDesc(btn){
   const d=document.getElementById('descBody');
@@ -210,26 +217,48 @@ function toggleDesc(btn){
   btn.textContent=v?'▼ 설명':'▶ 설명';
 }
 
-// 원본과 동일한 색상
+// 원본 KOSPI와 동일한 색상
 function getBg(c){
   if(c>=5)  return'#b71c1c';
   if(c>=3)  return'#e53935';
   if(c>=1)  return'#ef5350';
-  if(c>=0)  return'#ef9a9a';
+  if(c>=0.1)return'#ef9a9a';
+  if(c>=-0.1)return'#bdbdbd';
   if(c>=-1) return'#90caf9';
   if(c>=-3) return'#1e88e5';
   if(c>=-5) return'#1565c0';
   return'#0d47a1';
 }
 function getFg(c){
+  if(c>=-0.1&&c<0.1) return'#444';
   if(c>=0&&c<1) return'#7f1010';
   if(c>=-1&&c<0) return'#0a2d6e';
   return'#fff';
 }
 
-function setN(n,b){limitN=n;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');draw();}
+function setN(n,b){
+  limitN=n;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  draw();
+}
 function setSec(v){secF=v;draw();}
-function doSearch(v){srchQ=v.toLowerCase();draw();}
+function doSearch(v){
+  srchQ=v.toLowerCase();
+  // 검색하면 서진모드 해제
+  if(srchQ){sjMode=false;document.getElementById('sjBtn').classList.remove('on');}
+  draw();
+}
+function toggleSJ(btn){
+  sjMode=!sjMode;
+  btn.classList.toggle('on',sjMode);
+  // 서진 모드 켜면 검색 초기화
+  if(sjMode){
+    srchQ='';
+    document.getElementById('searchInput').value='';
+  }
+  draw();
+}
 
 async function fetchOne(ticker){
   try{
@@ -280,30 +309,36 @@ function showTip(e,d){
   const chg=pd?pd.chg:null;
   const sign=chg!==null&&chg>0?'+':'';
   document.getElementById('tt-name').textContent=d.data.n;
-  document.getElementById('tt-code').textContent=d.data.code+' · '+d.data.s;
+  document.getElementById('tt-meta').textContent=d.data.code+' · '+d.data.s;
   document.getElementById('tt-price').textContent=pd?pd.price.toLocaleString('ko-KR')+'원':'–';
   document.getElementById('tt-cap').textContent=d.data.cap||'–';
   document.getElementById('tt-sec').textContent=d.data.s;
-  const chgEl=document.getElementById('tt-chg');
+  const el=document.getElementById('tt-chg');
   if(chg!==null){
-    chgEl.textContent=sign+chg.toFixed(2)+'%';
-    chgEl.className=chg>0?'tt-chg-pos':chg<0?'tt-chg-neg':'tt-chg-zero';
-  }else{chgEl.textContent='–';chgEl.className='tt-chg-zero';}
+    el.textContent=sign+chg.toFixed(2)+'%';
+    el.className=chg>0.1?'tt-up':chg<-0.1?'tt-dn':'tt-zero';
+  }else{el.textContent='–';el.className='tt-zero';}
   tooltip.style.display='block';
   moveTip(e);
 }
 function moveTip(e){
-  const x=e.clientX+14, y=e.clientY+14;
-  const tw=tooltip.offsetWidth, th=tooltip.offsetHeight;
-  tooltip.style.left=(x+tw>window.innerWidth?x-tw-28:x)+'px';
-  tooltip.style.top=(y+th>window.innerHeight?y-th-28:y)+'px';
+  const x=e.clientX+16,y=e.clientY+16;
+  const tw=tooltip.offsetWidth,th=tooltip.offsetHeight;
+  tooltip.style.left=(x+tw>window.innerWidth?x-tw-32:x)+'px';
+  tooltip.style.top=(y+th>window.innerHeight?y-th-32:y)+'px';
 }
 function hideTip(){tooltip.style.display='none';}
 
+// 활성 셀 판별
+function isActive(d){
+  if(sjMode) return d.data.t==='178320.KQ';
+  if(srchQ)  return d.data.n.toLowerCase().includes(srchQ)||d.data.code.includes(srchQ);
+  return true;
+}
+
 function draw(){
   let list=ST.slice(0,limitN);
-  if(secF)list=list.filter(s=>s.s===secF);
-  if(srchQ)list=list.filter(s=>s.n.toLowerCase().includes(srchQ));
+  if(secF) list=list.filter(s=>s.s===secF);
 
   const wrap=document.getElementById('map-wrap');
   const W=wrap.clientWidth||900;
@@ -311,6 +346,8 @@ function draw(){
 
   const svg=d3.select('#map-svg').attr('viewBox',`0 0 ${W} ${H}`).attr('height',H);
   svg.selectAll('*').remove();
+
+  const hasFilter=sjMode||(srchQ.length>0);
 
   const root=d3.hierarchy({
     children:Object.entries(
@@ -325,19 +362,19 @@ function draw(){
     .paddingInner(1)
     .round(true)(root);
 
-  // 섹터
+  // 섹터 배경
   const secs=svg.selectAll('g.sec').data(root.children).join('g').attr('class','sec');
   secs.append('rect')
     .attr('x',d=>d.x0).attr('y',d=>d.y0)
     .attr('width',d=>d.x1-d.x0).attr('height',d=>d.y1-d.y0)
-    .attr('fill','#eef0f4').attr('rx',1);
+    .attr('fill','#eef1f6').attr('rx',2);
   secs.append('text')
     .attr('x',d=>d.x0+5).attr('y',d=>d.y0+12)
     .attr('font-size',10).attr('font-weight',700)
-    .attr('fill','rgba(0,0,0,0.4)')
+    .attr('fill','rgba(0,0,0,0.35)')
     .text(d=>d.data.name+' >');
 
-  // 종목
+  // 종목 셀
   const leaves=svg.selectAll('g.leaf').data(root.leaves()).join('g').attr('class','leaf');
 
   leaves.append('rect')
@@ -346,67 +383,67 @@ function draw(){
     .attr('width',d=>Math.max(0,d.x1-d.x0-2))
     .attr('height',d=>Math.max(0,d.y1-d.y0-2))
     .attr('rx',1)
-    .attr('fill',d=>{const pd=prices[d.data.t];return pd?getBg(pd.chg):'#c8d0d8';})
-    .on('mousemove',function(e,d){showTip(e,d);})
+    .attr('fill',d=>{
+      const pd=prices[d.data.t];
+      return pd?getBg(pd.chg):'#c8d4e0';
+    })
+    // 필터 없으면 전부 불투명, 필터 있으면 비활성 흐리게
+    .attr('opacity',d=>hasFilter?(isActive(d)?1:0.18):1)
+    // 서진시스템 버튼 활성시 골드 테두리
+    .attr('stroke',d=>(sjMode&&d.data.t==='178320.KQ')?'#FFD700':'none')
+    .attr('stroke-width',d=>(sjMode&&d.data.t==='178320.KQ')?3:0)
+    .on('mousemove',(e,d)=>showTip(e,d))
     .on('mouseleave',hideTip);
 
+  // 텍스트
   leaves.each(function(d){
     const w=d.x1-d.x0-2, h=d.y1-d.y0-2;
-    if(w<28||h<18)return;
+    if(w<28||h<18) return;
+    const active=!hasFilter||isActive(d);
     const pd=prices[d.data.t];
     const chg=pd?pd.chg:null;
     const fg=chg!==null?getFg(chg):'#fff';
     const cx=d.x0+1+w/2, cy=d.y0+1+h/2;
     const g=d3.select(this);
     const sign=chg!==null&&chg>0?'+':'';
-
-    // 이름 폰트 크기
     const nfs=Math.min(15,Math.max(8,Math.min(w/5,h/3.5)));
     const cfs=Math.max(7,nfs-2);
     const pfs=Math.max(7,nfs-3);
+    const op=hasFilter?(active?1:0.18):1;
 
     if(h>=56&&w>=52){
-      // 이름
-      g.append('text')
-        .attr('x',cx).attr('y',cy-(h>80?14:10))
+      g.append('text').attr('x',cx).attr('y',cy-(h>80?14:10))
         .attr('text-anchor','middle').attr('dominant-baseline','central')
-        .attr('fill',fg).attr('font-size',nfs).attr('font-weight',700)
+        .attr('fill',fg).attr('opacity',op).attr('font-size',nfs).attr('font-weight',700)
         .attr('pointer-events','none')
         .text(d.data.n.length>7?d.data.n.slice(0,7)+'…':d.data.n);
-      // 등락률
-      g.append('text')
-        .attr('x',cx).attr('y',cy+(h>80?2:4))
+      g.append('text').attr('x',cx).attr('y',cy+(h>80?2:4))
         .attr('text-anchor','middle').attr('dominant-baseline','central')
-        .attr('fill',fg).attr('font-size',cfs)
+        .attr('fill',fg).attr('opacity',op).attr('font-size',cfs)
         .attr('pointer-events','none')
         .text(chg!==null?sign+chg.toFixed(2)+'%':'–');
-      // 가격
       if(h>80&&pd){
-        g.append('text')
-          .attr('x',cx).attr('y',cy+16)
+        g.append('text').attr('x',cx).attr('y',cy+16)
           .attr('text-anchor','middle').attr('dominant-baseline','central')
-          .attr('fill',fg).attr('font-size',pfs).attr('opacity',.85)
+          .attr('fill',fg).attr('opacity',op*.85).attr('font-size',pfs)
           .attr('pointer-events','none')
           .text(pd.price.toLocaleString('ko-KR')+'원');
       }
     }else if(h>=32&&w>=40){
-      g.append('text')
-        .attr('x',cx).attr('y',cy-7)
+      g.append('text').attr('x',cx).attr('y',cy-7)
         .attr('text-anchor','middle').attr('dominant-baseline','central')
-        .attr('fill',fg).attr('font-size',Math.min(11,nfs)).attr('font-weight',700)
+        .attr('fill',fg).attr('opacity',op).attr('font-size',Math.min(11,nfs)).attr('font-weight',700)
         .attr('pointer-events','none')
         .text(d.data.n.length>5?d.data.n.slice(0,5)+'…':d.data.n);
-      g.append('text')
-        .attr('x',cx).attr('y',cy+7)
+      g.append('text').attr('x',cx).attr('y',cy+7)
         .attr('text-anchor','middle').attr('dominant-baseline','central')
-        .attr('fill',fg).attr('font-size',Math.min(9,cfs))
+        .attr('fill',fg).attr('opacity',op).attr('font-size',Math.min(9,cfs))
         .attr('pointer-events','none')
         .text(chg!==null?sign+chg.toFixed(2)+'%':'–');
     }else{
-      g.append('text')
-        .attr('x',cx).attr('y',cy)
+      g.append('text').attr('x',cx).attr('y',cy)
         .attr('text-anchor','middle').attr('dominant-baseline','central')
-        .attr('fill',fg).attr('font-size',Math.min(9,nfs)).attr('font-weight',700)
+        .attr('fill',fg).attr('opacity',op).attr('font-size',Math.min(9,nfs)).attr('font-weight',700)
         .attr('pointer-events','none')
         .text(d.data.n.length>4?d.data.n.slice(0,4):d.data.n);
     }
