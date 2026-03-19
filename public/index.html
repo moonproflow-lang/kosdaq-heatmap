@@ -99,6 +99,9 @@ select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px
     <option value="통신장비">통신장비</option>
   </select>
   <input class="search" id="searchInput" type="text" placeholder="🔍 종목 검색..." oninput="doSearch(this.value)">
+  <button class="sj-btn" id="sjBtn" onclick="toggleSJ(this)">
+    ★ 서진시스템 <span class="sj-rank" id="sjRank">–위</span>
+  </button>
   <button class="rf" id="rfBtn" onclick="loadAll()">↻ 새로고침</button>
   <div class="lgd"><span>-5%</span><div class="lgd-bar"></div><span>+5%</span></div>
 </div>
