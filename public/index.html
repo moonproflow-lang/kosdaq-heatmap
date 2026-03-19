@@ -358,7 +358,7 @@ function draw(){
   d3.treemap()
     .size([W,H])
     .paddingOuter(2)
-    .paddingTop(16)
+    .paddingTop(20)
     .paddingInner(1)
     .round(true)(root);
 
@@ -367,11 +367,11 @@ function draw(){
   secs.append('rect')
     .attr('x',d=>d.x0).attr('y',d=>d.y0)
     .attr('width',d=>d.x1-d.x0).attr('height',d=>d.y1-d.y0)
-    .attr('fill','#eef1f6').attr('rx',2);
+    .attr('fill','#e8ecf4').attr('rx',2);
   secs.append('text')
-    .attr('x',d=>d.x0+5).attr('y',d=>d.y0+12)
-    .attr('font-size',10).attr('font-weight',700)
-    .attr('fill','rgba(0,0,0,0.35)')
+    .attr('x',d=>d.x0+6).attr('y',d=>d.y0+14)
+    .attr('font-size',12).attr('font-weight',700)
+    .attr('fill','rgba(0,0,0,0.65)')
     .text(d=>d.data.name+' >');
 
   // 종목 셀
