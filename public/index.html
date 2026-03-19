@@ -80,9 +80,6 @@ select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px
     <button class="tab" onclick="setN(50,this)">상위 50</button>
     <button class="tab on" onclick="setN(100,this)">상위 100</button>
   </div>
-  <button class="sj-btn" id="sjBtn" onclick="toggleSJ(this)">
-    ★ 서진시스템 <span class="sj-rank" id="sjRank">–위</span>
-  </button>
   <div class="tab-grp" id="sortGrp">
     <button class="tab on" onclick="setSort('size',this)">규모순</button>
     <button class="tab" onclick="setSort('sector',this)">업종순</button>
@@ -256,7 +253,12 @@ function setN(n,b){
   b.classList.add('on');
   draw();
 }
-function setSec(v){secF=v;draw();}
+function setSec(v){
+  secF=v;
+  // 업종 선택시 서진/검색 모드 해제
+  if(v){sjMode=false;document.getElementById('sjBtn').classList.remove('on');srchQ='';document.getElementById('searchInput').value='';}
+  draw();
+}
 function doSearch(v){
   srchQ=v.toLowerCase();
   // 검색하면 서진모드 해제
@@ -347,12 +349,13 @@ function hideTip(){tooltip.style.display='none';}
 function isActive(d){
   if(sjMode) return d.data.t==='178320.KQ';
   if(srchQ)  return d.data.n.toLowerCase().includes(srchQ)||d.data.code.includes(srchQ);
+  if(secF)   return d.data.s===secF;
   return true;
 }
 
 function draw(){
   let list=ST.slice(0,limitN);
-  if(secF) list=list.filter(s=>s.s===secF);
+  // secF는 필터가 아닌 하이라이트 용도 (전체 맵 유지)
 
   const wrap=document.getElementById('map-wrap');
   const W=wrap.clientWidth||900;
@@ -361,7 +364,7 @@ function draw(){
   const svg=d3.select('#map-svg').attr('viewBox',`0 0 ${W} ${H}`).attr('height',H);
   svg.selectAll('*').remove();
 
-  const hasFilter=sjMode||(srchQ.length>0);
+  const hasFilter=sjMode||(srchQ.length>0)||(secF.length>0);
 
   let root;
   if(sortMode==='size'){
