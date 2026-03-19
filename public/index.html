@@ -7,14 +7,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
 body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f7f8fa;color:#222;font-size:12px}
-#wrap{padding:14px 16px;max-width:1600px;margin:0 auto}
-h1{font-size:20px;font-weight:700;margin-bottom:2px;color:#111}
-.desc-btn{font-size:11px;color:#888;margin-bottom:10px;cursor:pointer;user-select:none}
+#wrap{padding:10px 14px;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
+h1{font-size:18px;font-weight:700;margin-bottom:2px;color:#111;flex-shrink:0}
+.desc-btn{font-size:11px;color:#888;margin-bottom:6px;cursor:pointer;user-select:none;flex-shrink:0}
 .desc-body{display:none;font-size:11px;color:#555;margin-bottom:10px;line-height:1.8;background:#fff;padding:10px 14px;border-radius:6px;border:1px solid #e4e4e4}
 
 /* 툴바 */
-.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;background:#fff;padding:8px 12px;border-radius:8px;border:1px solid #e8e8e8;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;background:#fff;padding:6px 10px;border-radius:8px;border:1px solid #e8e8e8;box-shadow:0 1px 4px rgba(0,0,0,.04);flex-shrink:0}
 .tab-grp{display:flex;border:1px solid #d0d0d0;border-radius:5px;overflow:hidden}
 .tab{padding:5px 14px;background:#fff;font-size:12px;cursor:pointer;color:#555;border:none;border-right:1px solid #d0d0d0;transition:all .12s}
 .tab:last-child{border-right:none}
@@ -37,7 +38,7 @@ select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px
 .lgd-bar{width:110px;height:8px;border-radius:3px;background:linear-gradient(to right,#1565c0,#42a5f5,#e0e0e0,#ef5350,#b71c1c)}
 
 /* 상태바 */
-.info-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11px;color:#999}
+.info-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;font-size:11px;color:#999;flex-shrink:0}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ccc;margin-right:5px;vertical-align:middle}
 .dot.live{background:#43a047;animation:blink 1.8s infinite}
 .dot.err{background:#e53935}
@@ -46,7 +47,7 @@ select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px
 #errbox{background:#fff8e1;border:1px solid #ffe082;border-radius:5px;padding:6px 10px;font-size:11px;color:#e65100;margin-bottom:6px;display:none}
 
 /* 히트맵 */
-#map-wrap{width:100%;position:relative;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05);aspect-ratio:16/9}
+#map-wrap{width:100%;flex:1;min-height:0;position:relative;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 #map-svg{width:100%;display:block}
 .cell-rect{cursor:pointer;transition:opacity .2s}
 
@@ -62,7 +63,7 @@ select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px
 .tt-dn{font-weight:700;color:#1565c0}
 .tt-zero{font-weight:700;color:#666}
 
-#footer{margin-top:8px;font-size:11px;color:#bbb;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+#footer{margin-top:6px;font-size:10px;color:#bbb;display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -121,90 +122,94 @@ select{padding:4px 8px;border:1px solid #d0d0d0;border-radius:5px;font-size:12px
   <div class="tt-meta" id="tt-meta"></div>
   <div class="tt-row"><span class="tt-label">현재가</span><span class="tt-val" id="tt-price"></span></div>
   <div class="tt-row"><span class="tt-label">등락률</span><span id="tt-chg"></span></div>
+  <div class="tt-row"><span class="tt-label">전일</span><span class="tt-val" id="tt-prev"></span></div>
+  <div class="tt-row"><span class="tt-label">고가</span><span class="tt-val tt-up" id="tt-high"></span></div>
+  <div class="tt-row"><span class="tt-label">저가</span><span class="tt-val tt-dn" id="tt-low"></span></div>
+  <div class="tt-row"><span class="tt-label">거래량</span><span class="tt-val" id="tt-vol"></span></div>
   <div class="tt-row"><span class="tt-label">시가총액</span><span class="tt-val" id="tt-cap"></span></div>
   <div class="tt-row"><span class="tt-label">업종</span><span class="tt-val" id="tt-sec"></span></div>
 </div>
 
 <script>
 const ST=[
-  {n:"에코프로비엠",t:"247540.KQ",s:"이차전지",w:80,code:"247540",cap:"8.2조"},
-  {n:"에코프로",t:"086520.KQ",s:"이차전지",w:70,code:"086520",cap:"7.1조"},
-  {n:"알테오젠",t:"196170.KQ",s:"바이오",w:55,code:"196170",cap:"18.2조"},
-  {n:"HLB",t:"028300.KQ",s:"바이오",w:50,code:"028300",cap:"7.8조"},
-  {n:"하이브",t:"352820.KQ",s:"엔터",w:52,code:"352820",cap:"6.6조"},
-  {n:"크래프톤",t:"259960.KQ",s:"게임",w:58,code:"259960",cap:"13.4조"},
-  {n:"카카오뱅크",t:"323410.KQ",s:"핀테크",w:54,code:"323410",cap:"10.2조"},
-  {n:"JYP Ent.",t:"035900.KQ",s:"엔터",w:48,code:"035900",cap:"2.7조"},
-  {n:"엔씨소프트",t:"036570.KQ",s:"게임",w:50,code:"036570",cap:"6.2조"},
-  {n:"리가켐바이오",t:"141080.KQ",s:"바이오",w:38,code:"141080",cap:"4.1조"},
-  {n:"셀트리온헬스",t:"091990.KQ",s:"바이오",w:36,code:"091990",cap:"5.2조"},
-  {n:"카카오게임즈",t:"293490.KQ",s:"게임",w:32,code:"293490",cap:"1.4조"},
-  {n:"카카오페이",t:"377300.KQ",s:"핀테크",w:34,code:"377300",cap:"3.1조"},
-  {n:"SM",t:"041510.KQ",s:"엔터",w:30,code:"041510",cap:"1.9조"},
-  {n:"와이지엔터",t:"122870.KQ",s:"엔터",w:28,code:"122870",cap:"0.9조"},
-  {n:"펄어비스",t:"263750.KQ",s:"게임",w:26,code:"263750",cap:"1.3조"},
-  {n:"셀트리온제약",t:"068760.KQ",s:"바이오",w:30,code:"068760",cap:"2.8조"},
-  {n:"클래시스",t:"214150.KQ",s:"의료기기",w:28,code:"214150",cap:"2.2조"},
-  {n:"레인보우로보",t:"277810.KQ",s:"로봇",w:26,code:"277810",cap:"1.5조"},
-  {n:"HPSP",t:"403870.KQ",s:"반도체",w:28,code:"403870",cap:"2.3조"},
-  {n:"포스코DX",t:"022100.KQ",s:"IT서비스",w:26,code:"022100",cap:"2.1조"},
-  {n:"DB하이텍",t:"000990.KQ",s:"반도체",w:24,code:"000990",cap:"1.6조"},
-  {n:"천보",t:"278280.KQ",s:"이차전지",w:26,code:"278280",cap:"1.2조"},
-  {n:"엘앤에프",t:"066970.KQ",s:"이차전지",w:28,code:"066970",cap:"1.9조"},
-  {n:"에이피알",t:"278470.KQ",s:"화장품",w:24,code:"278470",cap:"1.8조"},
-  {n:"CJ ENM",t:"035760.KQ",s:"미디어",w:26,code:"035760",cap:"1.4조"},
-  {n:"리노공업",t:"058470.KQ",s:"반도체",w:20,code:"058470",cap:"1.3조"},
-  {n:"파크시스템스",t:"140860.KQ",s:"반도체",w:18,code:"140860",cap:"1.1조"},
-  {n:"ISC",t:"095340.KQ",s:"반도체",w:18,code:"095340",cap:"0.8조"},
-  {n:"실리콘투",t:"257540.KQ",s:"화장품",w:18,code:"257540",cap:"0.9조"},
-  {n:"코스메카",t:"241710.KQ",s:"화장품",w:16,code:"241710",cap:"0.7조"},
-  {n:"스튜디오드래곤",t:"253450.KQ",s:"미디어",w:18,code:"253450",cap:"0.9조"},
-  {n:"솔브레인",t:"357780.KQ",s:"반도체",w:16,code:"357780",cap:"1.1조"},
-  {n:"원익IPS",t:"240810.KQ",s:"반도체",w:16,code:"240810",cap:"0.7조"},
-  {n:"이오테크닉스",t:"039030.KQ",s:"반도체",w:16,code:"039030",cap:"0.8조"},
-  {n:"테크윙",t:"089970.KQ",s:"반도체",w:14,code:"089970",cap:"0.6조"},
-  {n:"넥스틴",t:"085310.KQ",s:"반도체",w:14,code:"085310",cap:"0.7조"},
-  {n:"고영",t:"098460.KQ",s:"반도체",w:14,code:"098460",cap:"0.6조"},
-  {n:"기가비스",t:"420940.KQ",s:"반도체",w:14,code:"420940",cap:"0.5조"},
-  {n:"루닛",t:"328130.KQ",s:"바이오",w:18,code:"328130",cap:"1.1조"},
-  {n:"유한양행",t:"000100.KQ",s:"제약",w:18,code:"000100",cap:"3.2조"},
-  {n:"파마리서치",t:"214450.KQ",s:"제약",w:14,code:"214450",cap:"0.9조"},
-  {n:"메디톡스",t:"086900.KQ",s:"바이오",w:14,code:"086900",cap:"0.7조"},
-  {n:"휴젤",t:"145020.KQ",s:"바이오",w:14,code:"145020",cap:"1.4조"},
-  {n:"서진시스템",t:"178320.KQ",s:"통신장비",w:14,code:"178320",cap:"0.5조"},
-  {n:"케이엠더블유",t:"032500.KQ",s:"통신장비",w:12,code:"032500",cap:"0.4조"},
-  {n:"위메이드",t:"112040.KQ",s:"게임",w:14,code:"112040",cap:"0.5조"},
-  {n:"더블유게임즈",t:"192080.KQ",s:"게임",w:12,code:"192080",cap:"0.6조"},
-  {n:"컴투스",t:"078340.KQ",s:"게임",w:12,code:"078340",cap:"0.5조"},
-  {n:"심텍",t:"222800.KQ",s:"반도체",w:12,code:"222800",cap:"0.4조"},
-  {n:"이수페타시스",t:"007660.KQ",s:"반도체",w:12,code:"007660",cap:"0.5조"},
-  {n:"씨젠",t:"096530.KQ",s:"바이오",w:10,code:"096530",cap:"0.4조"},
-  {n:"HLB생명",t:"067630.KQ",s:"바이오",w:10,code:"067630",cap:"0.3조"},
-  {n:"코미팜",t:"041960.KQ",s:"바이오",w:8,code:"041960",cap:"0.2조"},
-  {n:"셀리드",t:"299660.KQ",s:"바이오",w:8,code:"299660",cap:"0.2조"},
-  {n:"큐로셀",t:"445680.KQ",s:"바이오",w:8,code:"445680",cap:"0.3조"},
-  {n:"뷰노",t:"338220.KQ",s:"바이오",w:8,code:"338220",cap:"0.3조"},
-  {n:"제이엘케이",t:"322510.KQ",s:"바이오",w:8,code:"322510",cap:"0.2조"},
-  {n:"오상헬스케어",t:"053980.KQ",s:"의료기기",w:8,code:"053980",cap:"0.2조"},
-  {n:"RFHIC",t:"218410.KQ",s:"통신장비",w:8,code:"218410",cap:"0.2조"},
-  {n:"하나마이크론",t:"067310.KQ",s:"반도체",w:8,code:"067310",cap:"0.3조"},
-  {n:"자화전자",t:"033240.KQ",s:"반도체",w:8,code:"033240",cap:"0.3조"},
-  {n:"비에이치",t:"090460.KQ",s:"반도체",w:8,code:"090460",cap:"0.3조"},
-  {n:"GST",t:"083450.KQ",s:"반도체",w:8,code:"083450",cap:"0.2조"},
-  {n:"씨아이에스",t:"222080.KQ",s:"이차전지",w:8,code:"222080",cap:"0.2조"},
-  {n:"필에너지",t:"378340.KQ",s:"이차전지",w:8,code:"378340",cap:"0.2조"},
-  {n:"파수",t:"150900.KQ",s:"IT서비스",w:8,code:"150900",cap:"0.2조"},
-  {n:"네오위즈",t:"095660.KQ",s:"게임",w:8,code:"095660",cap:"0.3조"},
-  {n:"동아에스티",t:"170900.KQ",s:"제약",w:8,code:"170900",cap:"0.4조"},
-  {n:"한미사이언스",t:"008930.KQ",s:"제약",w:8,code:"008930",cap:"0.6조"},
-  {n:"동진쎄미켐",t:"005290.KQ",s:"반도체",w:8,code:"005290",cap:"0.3조"},
-  {n:"피에스케이",t:"319660.KQ",s:"반도체",w:8,code:"319660",cap:"0.3조"},
-  {n:"윈팩",t:"097800.KQ",s:"반도체",w:6,code:"097800",cap:"0.1조"},
-  {n:"샘씨엔에스",t:"252990.KQ",s:"반도체",w:6,code:"252990",cap:"0.1조"},
-  {n:"네패스아크",t:"330860.KQ",s:"반도체",w:6,code:"330860",cap:"0.1조"},
-  {n:"제우스",t:"079370.KQ",s:"반도체",w:6,code:"079370",cap:"0.2조"},
-  {n:"인텍플러스",t:"064290.KQ",s:"반도체",w:6,code:"064290",cap:"0.1조"},
-  {n:"엠플러스",t:"259630.KQ",s:"이차전지",w:6,code:"259630",cap:"0.1조"},
+  {n:"에코프로비엠",t:"247540.KQ",s:"이차전지",w:80,code:"247540"},
+  {n:"에코프로",t:"086520.KQ",s:"이차전지",w:70,code:"086520"},
+  {n:"알테오젠",t:"196170.KQ",s:"바이오",w:55,code:"196170"},
+  {n:"HLB",t:"028300.KQ",s:"바이오",w:50,code:"028300"},
+  {n:"하이브",t:"352820.KQ",s:"엔터",w:52,code:"352820"},
+  {n:"크래프톤",t:"259960.KQ",s:"게임",w:58,code:"259960"},
+  {n:"카카오뱅크",t:"323410.KQ",s:"핀테크",w:54,code:"323410"},
+  {n:"JYP Ent.",t:"035900.KQ",s:"엔터",w:48,code:"035900"},
+  {n:"엔씨소프트",t:"036570.KQ",s:"게임",w:50,code:"036570"},
+  {n:"리가켐바이오",t:"141080.KQ",s:"바이오",w:38,code:"141080"},
+  {n:"셀트리온헬스",t:"091990.KQ",s:"바이오",w:36,code:"091990"},
+  {n:"카카오게임즈",t:"293490.KQ",s:"게임",w:32,code:"293490"},
+  {n:"카카오페이",t:"377300.KQ",s:"핀테크",w:34,code:"377300"},
+  {n:"SM",t:"041510.KQ",s:"엔터",w:30,code:"041510"},
+  {n:"와이지엔터",t:"122870.KQ",s:"엔터",w:28,code:"122870"},
+  {n:"펄어비스",t:"263750.KQ",s:"게임",w:26,code:"263750"},
+  {n:"셀트리온제약",t:"068760.KQ",s:"바이오",w:30,code:"068760"},
+  {n:"클래시스",t:"214150.KQ",s:"의료기기",w:28,code:"214150"},
+  {n:"레인보우로보",t:"277810.KQ",s:"로봇",w:26,code:"277810"},
+  {n:"HPSP",t:"403870.KQ",s:"반도체",w:28,code:"403870"},
+  {n:"포스코DX",t:"022100.KQ",s:"IT서비스",w:26,code:"022100"},
+  {n:"DB하이텍",t:"000990.KQ",s:"반도체",w:24,code:"000990"},
+  {n:"천보",t:"278280.KQ",s:"이차전지",w:26,code:"278280"},
+  {n:"엘앤에프",t:"066970.KQ",s:"이차전지",w:28,code:"066970"},
+  {n:"에이피알",t:"278470.KQ",s:"화장품",w:24,code:"278470"},
+  {n:"CJ ENM",t:"035760.KQ",s:"미디어",w:26,code:"035760"},
+  {n:"리노공업",t:"058470.KQ",s:"반도체",w:20,code:"058470"},
+  {n:"파크시스템스",t:"140860.KQ",s:"반도체",w:18,code:"140860"},
+  {n:"ISC",t:"095340.KQ",s:"반도체",w:18,code:"095340"},
+  {n:"실리콘투",t:"257540.KQ",s:"화장품",w:18,code:"257540"},
+  {n:"코스메카",t:"241710.KQ",s:"화장품",w:16,code:"241710"},
+  {n:"스튜디오드래곤",t:"253450.KQ",s:"미디어",w:18,code:"253450"},
+  {n:"솔브레인",t:"357780.KQ",s:"반도체",w:16,code:"357780"},
+  {n:"원익IPS",t:"240810.KQ",s:"반도체",w:16,code:"240810"},
+  {n:"이오테크닉스",t:"039030.KQ",s:"반도체",w:16,code:"039030"},
+  {n:"테크윙",t:"089970.KQ",s:"반도체",w:14,code:"089970"},
+  {n:"넥스틴",t:"085310.KQ",s:"반도체",w:14,code:"085310"},
+  {n:"고영",t:"098460.KQ",s:"반도체",w:14,code:"098460"},
+  {n:"기가비스",t:"420940.KQ",s:"반도체",w:14,code:"420940"},
+  {n:"루닛",t:"328130.KQ",s:"바이오",w:18,code:"328130"},
+  {n:"유한양행",t:"000100.KQ",s:"제약",w:18,code:"000100"},
+  {n:"파마리서치",t:"214450.KQ",s:"제약",w:14,code:"214450"},
+  {n:"메디톡스",t:"086900.KQ",s:"바이오",w:14,code:"086900"},
+  {n:"휴젤",t:"145020.KQ",s:"바이오",w:14,code:"145020"},
+  {n:"서진시스템",t:"178320.KQ",s:"통신장비",w:14,code:"178320"},
+  {n:"케이엠더블유",t:"032500.KQ",s:"통신장비",w:12,code:"032500"},
+  {n:"위메이드",t:"112040.KQ",s:"게임",w:14,code:"112040"},
+  {n:"더블유게임즈",t:"192080.KQ",s:"게임",w:12,code:"192080"},
+  {n:"컴투스",t:"078340.KQ",s:"게임",w:12,code:"078340"},
+  {n:"심텍",t:"222800.KQ",s:"반도체",w:12,code:"222800"},
+  {n:"이수페타시스",t:"007660.KQ",s:"반도체",w:12,code:"007660"},
+  {n:"씨젠",t:"096530.KQ",s:"바이오",w:10,code:"096530"},
+  {n:"HLB생명",t:"067630.KQ",s:"바이오",w:10,code:"067630"},
+  {n:"코미팜",t:"041960.KQ",s:"바이오",w:8,code:"041960"},
+  {n:"셀리드",t:"299660.KQ",s:"바이오",w:8,code:"299660"},
+  {n:"큐로셀",t:"445680.KQ",s:"바이오",w:8,code:"445680"},
+  {n:"뷰노",t:"338220.KQ",s:"바이오",w:8,code:"338220"},
+  {n:"제이엘케이",t:"322510.KQ",s:"바이오",w:8,code:"322510"},
+  {n:"오상헬스케어",t:"053980.KQ",s:"의료기기",w:8,code:"053980"},
+  {n:"RFHIC",t:"218410.KQ",s:"통신장비",w:8,code:"218410"},
+  {n:"하나마이크론",t:"067310.KQ",s:"반도체",w:8,code:"067310"},
+  {n:"자화전자",t:"033240.KQ",s:"반도체",w:8,code:"033240"},
+  {n:"비에이치",t:"090460.KQ",s:"반도체",w:8,code:"090460"},
+  {n:"GST",t:"083450.KQ",s:"반도체",w:8,code:"083450"},
+  {n:"씨아이에스",t:"222080.KQ",s:"이차전지",w:8,code:"222080"},
+  {n:"필에너지",t:"378340.KQ",s:"이차전지",w:8,code:"378340"},
+  {n:"파수",t:"150900.KQ",s:"IT서비스",w:8,code:"150900"},
+  {n:"네오위즈",t:"095660.KQ",s:"게임",w:8,code:"095660"},
+  {n:"동아에스티",t:"170900.KQ",s:"제약",w:8,code:"170900"},
+  {n:"한미사이언스",t:"008930.KQ",s:"제약",w:8,code:"008930"},
+  {n:"동진쎄미켐",t:"005290.KQ",s:"반도체",w:8,code:"005290"},
+  {n:"피에스케이",t:"319660.KQ",s:"반도체",w:8,code:"319660"},
+  {n:"윈팩",t:"097800.KQ",s:"반도체",w:6,code:"097800"},
+  {n:"샘씨엔에스",t:"252990.KQ",s:"반도체",w:6,code:"252990"},
+  {n:"네패스아크",t:"330860.KQ",s:"반도체",w:6,code:"330860"},
+  {n:"제우스",t:"079370.KQ",s:"반도체",w:6,code:"079370"},
+  {n:"인텍플러스",t:"064290.KQ",s:"반도체",w:6,code:"064290"},
+  {n:"엠플러스",t:"259630.KQ",s:"이차전지",w:6,code:"259630"},
 ];
 
 // 서진시스템 순위 계산
@@ -282,7 +287,7 @@ async function fetchOne(ticker){
     if(!r.ok)return null;
     const j=await r.json();
     if(j.error)return null;
-    return{price:j.price,chg:j.chg};
+    return{price:j.price,chg:j.chg,capStr:j.capStr||'–',open:j.open,high:j.high,low:j.low,volume:j.volume,prev:j.prev};
   }catch{return null;}
 }
 
@@ -327,7 +332,11 @@ function showTip(e,d){
   document.getElementById('tt-name').textContent=d.data.n;
   document.getElementById('tt-meta').textContent=d.data.code+' · '+d.data.s;
   document.getElementById('tt-price').textContent=pd?pd.price.toLocaleString('ko-KR')+'원':'–';
-  document.getElementById('tt-cap').textContent=d.data.cap||'–';
+  document.getElementById('tt-prev').textContent=pd&&pd.prev?pd.prev.toLocaleString('ko-KR')+'원':'–';
+  document.getElementById('tt-high').textContent=pd&&pd.high?pd.high.toLocaleString('ko-KR')+'원':'–';
+  document.getElementById('tt-low').textContent=pd&&pd.low?pd.low.toLocaleString('ko-KR')+'원':'–';
+  document.getElementById('tt-vol').textContent=pd&&pd.volume?pd.volume.toLocaleString('ko-KR'):'–';
+  document.getElementById('tt-cap').textContent=pd&&pd.capStr?pd.capStr:'–';
   document.getElementById('tt-sec').textContent=d.data.s;
   const el=document.getElementById('tt-chg');
   if(chg!==null){
@@ -359,7 +368,7 @@ function draw(){
 
   const wrap=document.getElementById('map-wrap');
   const W=wrap.clientWidth||900;
-  const H=Math.round(W*9/16);
+  const H=wrap.clientHeight||Math.round(W*9/16);
 
   const svg=d3.select('#map-svg').attr('viewBox',`0 0 ${W} ${H}`).attr('height',H);
   svg.selectAll('*').remove();
