@@ -7,9 +7,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden}
+html,body{width:100%;height:100%;overflow:hidden;background:#f7f8fa}
 body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:#f7f8fa;color:#222;font-size:12px}
-#wrap{padding:10px 14px;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden}
+#wrap{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:100%;
+  aspect-ratio:16/9;
+  max-height:100%;
+  max-width:calc(100vh * 16/9);
+  padding:10px 14px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:#f7f8fa;
+}
 h1{font-size:18px;font-weight:700;margin-bottom:2px;color:#111;flex-shrink:0}
 .desc-btn{font-size:11px;color:#888;margin-bottom:6px;cursor:pointer;user-select:none;flex-shrink:0}
 .desc-body{display:none;font-size:11px;color:#555;margin-bottom:10px;line-height:1.8;background:#fff;padding:10px 14px;border-radius:6px;border:1px solid #e4e4e4}
