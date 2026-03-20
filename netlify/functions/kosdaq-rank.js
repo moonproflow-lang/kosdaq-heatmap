@@ -64,8 +64,9 @@ exports.handler = async function(event) {
         rank: i + 1,
         code: d.ISU_SRT_CD,
         name: d.ISU_ABBRV,
-        marketCap: Number(d.MKTCAP) * 1e6, // KRX 단위: 백만원
+        marketCap: Number(d.MKTCAP) * 1e6,
         capStr: formatCap(Number(d.MKTCAP) * 1e6),
+        sector: d.IDX_IND_NM || d.SECT_TP_NM || '',
       }));
 
     return {
